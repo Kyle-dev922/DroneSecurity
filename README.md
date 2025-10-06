@@ -28,3 +28,5 @@ Determine whether implementing a Hardware Abstraction Layer (HAL) is necessary a
 
    * Determine whether the new SDR can be integrated by simply adapting the current code.
    * If major restructuring would be required, evaluate whether a HAL could simplify or future-proof the integration.
+
+4.
