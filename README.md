@@ -1,8 +1,13 @@
-# SDR Hardware Abstraction Layer (HAL) Investigation
+# SDR Integration & Real-Time Drone-ID Visualization
 
-This repository focuses on investigating whether a Hardware Abstraction Layer (HAL) is needed to integrate an existing Python-based Drone-ID signal processing chain with a different Software Defined Radio (SDR) or SDR control library than the one the original code was built around.
+This repository investigates two core aspects of enhancing the Drone-ID signal processing system:
 
-The goal is to assess if introducing a HAL would make integration cleaner, simpler, and more maintainable, or if direct adaptation of the existing code is sufficient.
+1. Whether implementing a Hardware Abstraction Layer (HAL) is necessary to integrate the existing Python-based Drone-ID signal processing chain with different Software Defined Radio (SDR) hardware or control libraries.
+
+2. The development of a Graphical User Interface (GUI) or application to wrap the reference code and Cyrus’ work, allowing the system to be showcased as a real-time demonstration of signal capture, decoding, and GPS visualization.
+
+The aim is to make SDR integration cleaner and more maintainable while providing an interactive front-end for real-time data presentation.
+
 
 ## Reference Material
 
@@ -29,4 +34,14 @@ Determine whether implementing a Hardware Abstraction Layer (HAL) is necessary a
    * Determine whether the new SDR can be integrated by simply adapting the current code.
    * If major restructuring would be required, evaluate whether a HAL could simplify or future-proof the integration.
 
-4.
+# Secondary Goal — Real-Time Demonstration GUI
+
+Develop a Graphical User Interface (GUI) or standalone application to wrap the reference Drone-ID processing code and Cyrus’ enhancements, enabling the project to function as a live demonstration tool.
+
+The GUI will include three key visualization components:
+
+1. Raw Capture (Frequency Domain): Display real-time spectrum data directly from the SDR input.
+
+2. Unpackaged Data: Visualize decoded Drone-ID data using the existing Python processing chain.
+
+3. GPS Data Visualization: Present extracted GPS coordinates on an interactive globe or map interface.
