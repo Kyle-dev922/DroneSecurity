@@ -17,6 +17,7 @@ import time
 import sys
 
 import warnings
+import operator as op
 
 warnings.filterwarnings("ignore")
 queue = mp.Queue()
@@ -41,6 +42,7 @@ total_num_pkt = 0
 recv_thread = None
 worker = None 
 
+
 def signal_handler(sig, frame):
     global exit_event
     exit_event.set()
@@ -63,8 +65,8 @@ def decoded_to_file(raw_bits):
         with open(db_filename,"ab") as fd:
             fd.write(raw_bits)
 
-def set_sdr(usrp, sample_rate=50e6, duration_s=1.3, gain=None):
-    ###### dev config (UHD b200) #####
+def set_sdr(usrp, sample_rate=50e6, duration_s=1.3, gain=None): # The receiver scans every band for 1.3 seconds at 50 MHz bandwidth #
+    ###### dev config (UHD N210) #####
     # RX2 port for 2.4 GHz antenna
     usrp.set_rx_antenna("RX2",0)
     if gain:
@@ -72,7 +74,7 @@ def set_sdr(usrp, sample_rate=50e6, duration_s=1.3, gain=None):
     else:
         usrp.set_rx_agc(True, 0)
 
-    num_samps = duration_s*sample_rate
+    num_samps = duration_s*sample_rate # resulting in 52 Mb batch sizes per band #
 
     usrp.set_rx_rate(sample_rate, 0)
     dev_samp_rate = usrp.get_rx_rate()
@@ -88,7 +90,7 @@ def set_sdr(usrp, sample_rate=50e6, duration_s=1.3, gain=None):
 
 def run_demod(samples,Fs, debug=False, legacy = False):
     global correct_pkt, crc_err, total_num_pkt
-    chunk_samples = int(500e-3 * Fs) # in seconds
+    chunk_samples = int(500e-3 * Fs) # in seconds. For every 500 ms, the code processes a new "chunk" of data samples 
     found = False
 
     #for packet in packets:
@@ -244,12 +246,28 @@ def main():
     parser.add_argument('-d', '--debug', default=False, action="store_true", help="Enable debug output")
     parser.add_argument('-t', '--duration', default=1.3, type=float, help="Time of receiving samples per band")
     parser.add_argument('-p', '--packettype', default="droneid", type=str, help="Packet type: droneid, c2, beacon, video")
+    
+    parser.add_argument('-sn', '--device', default="type=b200", type=str, help="SDR serial argument")
 
-    args = parser.parse_args()
+    args = parser.parse_args() # Holds parsed arguments as attributes
 
+    # if else
+    # if no type assume serial
+
+    s = args.device
 
     signal.signal(signal.SIGINT, signal_handler)
-    usrp = uhd.usrp.MultiUSRP("type=b200, recv_frame_size=8200,num_recv_frames=512")
+    try:
+        if op.contains(s,"type"): #searches for type
+            print(f"Type Argument")
+            usrp = uhd.usrp.MultiUSRP(f"{s}, recv_frame_size=8200, num_recv_frames=512")
+        else: #searches for serial
+            print(f"Serial Argument")
+            usrp = uhd.usrp.MultiUSRP(f"{s}, recv_frame_size=8200, num_recv_frames=512")
+    except RuntimeError as e:
+        print(e)
+        print(f"Couldn't find device {s}. Using default settings. \n")
+        usrp = uhd.usrp.MultiUSRP("serial=319F93F, recv_frame_size=8200,num_recv_frames=512")
 
     if args.gain > 0:
         gain = args.gain
